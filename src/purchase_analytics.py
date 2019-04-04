@@ -3,7 +3,7 @@ import csv
 import time
 import sys
 import os
-from src.dataframe import TableProcessor
+from src.processor import TableProcessor
 
 
 def load_product_department(csv_file):
