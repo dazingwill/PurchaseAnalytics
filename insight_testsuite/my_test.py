@@ -1,5 +1,7 @@
 import unittest
 import os
+import sys
+sys.path.append(os.path.realpath("./src"))
 
 from purchase_analytics import analyze_purchases
 from data_table import DataTable, OrderProductTable, ProductTable, DepartmentStaticsTable
