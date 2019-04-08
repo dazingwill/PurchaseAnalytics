@@ -20,21 +20,22 @@ class DataTable:
     # the headers in this table must include all the fields PREDEFINED_HEADERS have.
     PREDEFINED_HEADERS = None
 
-    def is_headers_compatible(self, headers):
-        if self.PREDEFINED_HEADERS is None or headers is None:
-            return self.PREDEFINED_HEADERS or headers
-        missed_headers = set(self.PREDEFINED_HEADERS).difference(headers)
-        return len(missed_headers) == 0
-
     def __init__(self, records=None, headers=None):
         if not self.is_headers_compatible(headers):
-            raise ValueError("Cannot find all required headers: "
-                             "headers must include {}".format(", ".join(self.PREDEFINED_HEADERS)))
+            if self.PREDEFINED_HEADERS is None:
+                raise TypeError("headers cannot be empty")
+            else:
+                raise ValueError("Cannot find all required headers: "
+                                 "headers must include {}".format(", ".join(self.PREDEFINED_HEADERS)))
         if not isinstance(records, Iterable):
             raise TypeError("records must be iterable")
 
         self.headers = headers or self.PREDEFINED_HEADERS
+        self.header_index = {header: index for index, header in enumerate(self.headers)}
         self.records = records
+
+    def __iter__(self):
+        return self.records
 
     @classmethod
     def from_csv(cls, csv_file):
@@ -42,6 +43,12 @@ class DataTable:
         headers = next(csv_records)
         table = cls(csv_records, headers)
         return table
+
+    def is_headers_compatible(self, headers):
+        if self.PREDEFINED_HEADERS is None or headers is None:
+            return self.PREDEFINED_HEADERS or headers
+        missed_headers = set(self.PREDEFINED_HEADERS).difference(headers)
+        return len(missed_headers) == 0
 
     def to_csv(self, filepath):
         with open(filepath, "w", newline="") as csv_file:
@@ -55,9 +62,6 @@ class DataTable:
             for i in range(min(len(self.headers), len(row)))
         }, self.records)
 
-    def __iter__(self):
-        return self.records
-
 
 class OrderProductTable(DataTable):
     """
@@ -67,9 +71,11 @@ class OrderProductTable(DataTable):
 
     # Note: hardcoded this transfer function to make it faster
     def dict_records(self):
+        product_id_index = self.header_index["product_id"]
+        reordered_index = self.header_index["reordered"]
         return map(lambda row: {
-            "product_id": row[1],
-            "reordered": row[3] == '1'
+            "product_id": row[product_id_index],
+            "reordered": row[reordered_index] == '1'
         }, self.records)
 
 
@@ -92,7 +98,7 @@ class DepartmentStaticsTable(DataTable):
     PREDEFINED_HEADERS = ["department_id", "number_of_orders", "number_of_first_orders", "percentage"]
 
     def __init__(self, records=None, departments=None):
-        if not records and departments is not None:
+        if not records and isinstance(departments, Iterable):
             records = {department_id: [department_id, 0, 0, 0] for department_id in departments}
         super().__init__(records)
 
