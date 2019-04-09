@@ -3,8 +3,8 @@ import os
 import sys
 sys.path.append(os.path.realpath("./src"))
 
-from purchase_analytics import analyze_purchases
-from data_table import DataTable, OrderProductTable, ProductTable, DepartmentStaticsTable
+from purchase_analytics import analyze_purchases, DepartmentOrderCounter
+from data_table import DataTable, OrderProductTable, ProductTable
 
 
 def read_file(filepath):
@@ -14,7 +14,7 @@ def read_file(filepath):
 
 class MyTest(unittest.TestCase):
 
-    FULL_TEST = False
+    FULL_TEST = True
 
     @classmethod
     def setUpClass(cls):
@@ -115,17 +115,17 @@ class MyTest(unittest.TestCase):
             rows = list(table)
 
     def test_department_statics_table(self):
-        """test regular operations for DepartmentStaticsTable"""
+        """test regular operations for DepartmentOrderCounter"""
         with self.assertRaises(TypeError):
-            DepartmentStaticsTable()
+            DepartmentOrderCounter()
         with self.assertRaises(TypeError):
-            DepartmentStaticsTable(departments=5)
+            DepartmentOrderCounter(departments=5)
 
         correct_report_path = os.path.join(self.test_customized_path, "report_department_statics_table.csv")
-        table = DepartmentStaticsTable([[0, 0, 0, 0], [1, 0, 0, 0]])
-        table.add_order_count(1, 2)
-        table.add_first_order_count(1)
-        table.to_csv(self.temp_report_path)
+        counter = DepartmentOrderCounter([0, 1])
+        counter.add_order_count(1, 2)
+        counter.add_first_order_count(1)
+        counter.to_data_table().to_csv(self.temp_report_path)
         self.assertMultiLineEqual(read_file(self.temp_report_path), read_file(correct_report_path),
                                   "report file is not equal to the answer")
 

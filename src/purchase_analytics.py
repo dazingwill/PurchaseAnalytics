@@ -1,7 +1,47 @@
 import sys
 import os
 
-from data_table import DepartmentStaticsTable, OrderProductTable, ProductTable
+from data_table import DataTable, OrderProductTable, ProductTable
+
+
+class DepartmentOrderCounter:
+    """
+    class for counting department orders.
+    """
+    def __init__(self, departments=None):
+        """
+        Init counter to count the department orders
+        :param departments: iterable, contains all the possible department id.
+        """
+        self.counts = {
+            department_id: {
+                "department_id": department_id,
+                "number_of_orders": 0,
+                "number_of_first_orders": 0
+            } for department_id in departments}
+
+    def add_order_count(self, department_id, count=1):
+        self.counts[department_id]["number_of_orders"] += count
+
+    def add_first_order_count(self, department_id, count=1):
+        self.counts[department_id]["number_of_first_orders"] += count
+
+    def to_data_table(self):
+        headers = ["department_id", "number_of_orders", "number_of_first_orders", "percentage"]
+        records = self.counts.values()
+
+        # remove the rows with no order count
+        records = filter(lambda record: record["number_of_orders"] > 0, records)
+
+        def calculate_ratio(record):
+            row = [record["department_id"], record["number_of_orders"], record["number_of_first_orders"], 0]
+            row[3] = "{:.2f}".format(row[2] / row[1])
+            return row
+        records = map(calculate_ratio, records)
+
+        # put rows in increasing order of department's id
+        records = sorted(records, key=lambda row: int(row[0]))
+        return DataTable(records, headers)
 
 
 def extract_product_departments(products_path):
@@ -25,12 +65,12 @@ def count_department_orders(order_products_path, product_departments):
 
     :param order_products_path: str, path of the csv file holds order records
     :param product_departments: dict, map product id to department id
-    :return: department_statics: DepartmentStaticsTable, save the counts of orders for each department
+    :return: department_statics: DepartmentOrderCounter, save the counts of orders for each department
     """
 
     # init department statics table
     departments = set(product_departments.values())
-    department_statics = DepartmentStaticsTable(departments=departments)
+    department_statics = DepartmentOrderCounter(departments)
 
     # iterate order records from csv file and add counts into statics table
     with open(order_products_path, "r", encoding="utf-8") as order_products_file:
@@ -65,7 +105,7 @@ def analyze_purchases(order_products_path, products_path, report_path):
     """
     product_departments = extract_product_departments(products_path)
     department_statics = count_department_orders(order_products_path, product_departments)
-    department_statics.to_csv(report_path)
+    department_statics.to_data_table().to_csv(report_path)
 
 
 if __name__ == '__main__':
