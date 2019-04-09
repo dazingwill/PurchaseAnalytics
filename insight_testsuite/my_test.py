@@ -14,7 +14,7 @@ def read_file(filepath):
 
 class MyTest(unittest.TestCase):
 
-    FULL_TEST = True
+    TEST_PRIOR = False
 
     @classmethod
     def setUpClass(cls):
@@ -74,7 +74,7 @@ class MyTest(unittest.TestCase):
         self.assertMultiLineEqual(read_file(self.temp_report_path), read_file(correct_report_path),
                                   "report file is not equal to the answer")
 
-    @unittest.skipUnless(FULL_TEST, "skip prior dataset to save time")
+    @unittest.skipUnless(TEST_PRIOR, "skip prior dataset to save time")
     def test_prior_dataset(self):
         """test in prior dataset provided by Instacart"""
         test_path = os.path.join(self.tests_path, "test_prior_dataset")
