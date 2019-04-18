@@ -20,7 +20,7 @@ class DataTable:
     # the headers in this table must include all the fields PREDEFINED_HEADERS have.
     PREDEFINED_HEADERS = None
 
-    def __init__(self, records=None, headers=None):
+    def __init__(self, records, headers=None):
         if not self.is_headers_compatible(headers):
             if self.PREDEFINED_HEADERS is None:
                 raise TypeError("headers cannot be empty")

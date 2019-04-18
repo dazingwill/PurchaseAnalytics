@@ -31,13 +31,13 @@ class DepartmentOrderCounter:
         records = self.counts.values()
 
         # remove the rows with no order count
-        records = filter(lambda record: record["number_of_orders"] > 0, records)
+        records = filter(lambda row: row["number_of_orders"] > 0, records)
 
-        def calculate_ratio(record):
+        def append_ratio(record):
             row = [record["department_id"], record["number_of_orders"], record["number_of_first_orders"], 0]
             row[3] = "{:.2f}".format(row[2] / row[1])
             return row
-        records = map(calculate_ratio, records)
+        records = map(append_ratio, records)
 
         # put rows in increasing order of department's id
         records = sorted(records, key=lambda row: int(row[0]))
@@ -65,12 +65,12 @@ def count_department_orders(order_products_path, product_departments):
 
     :param order_products_path: str, path of the csv file holds order records
     :param product_departments: dict, map product id to department id
-    :return: department_statics: DepartmentOrderCounter, save the counts of orders for each department
+    :return: department_statistics: DepartmentOrderCounter, save the counts of orders for each department
     """
 
-    # init department statics table
+    # init department statistics table
     departments = set(product_departments.values())
-    department_statics = DepartmentOrderCounter(departments)
+    department_statistics = DepartmentOrderCounter(departments)
 
     # iterate order records from csv file and add counts into statics table
     with open(order_products_path, "r", encoding="utf-8") as order_products_file:
@@ -83,13 +83,13 @@ def count_department_orders(order_products_path, product_departments):
 
             # count order for the department
             department_id = product_departments[row["product_id"]]
-            department_statics.add_order_count(department_id)
+            department_statistics.add_order_count(department_id)
 
             # count first order for the department
             if not row["reordered"]:
-                department_statics.add_first_order_count(department_id)
+                department_statistics.add_first_order_count(department_id)
 
-    return department_statics
+    return department_statistics
 
 
 def analyze_purchases(order_products_path, products_path, report_path):
@@ -104,8 +104,8 @@ def analyze_purchases(order_products_path, products_path, report_path):
     :return: None
     """
     product_departments = extract_product_departments(products_path)
-    department_statics = count_department_orders(order_products_path, product_departments)
-    department_statics.to_data_table().to_csv(report_path)
+    department_statistics = count_department_orders(order_products_path, product_departments)
+    department_statistics.to_data_table().to_csv(report_path)
 
 
 if __name__ == '__main__':

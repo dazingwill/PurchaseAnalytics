@@ -6,7 +6,7 @@ See <https://github.com/InsightDataScience/Purchase-Analytics>
 
 ## Environment
 
-Python 3 (I use Python 3.6)
+Python 3
 
 ## Usage
 
@@ -15,7 +15,7 @@ Python 3 (I use Python 3.6)
   python3 path/to/purchase_analytics.py path/to/order_products.csv path/to/products.csv path/to/report.csv
   ```
 
-* To run the script on files in `input` folder:
+* To process the input files in `input` folder:
 
   run  `run.sh`
 
@@ -34,13 +34,13 @@ Python 3 (I use Python 3.6)
 
 ### Memory
 
-The input records are read and processed line-by-line. The majority of the memory occupied should be the product-to-department dictionary with the one item for each products record.
+The input records are read and processed line-by-line. The majority of the memory consuming should be the product-to-department dictionary which has about 50,000 key-value pairs.
 
 ### Time
 
 For prior dataset, run time in my computer is around 50 seconds.
 
-The most of the time consumed in operations on order records.
+Most of the time is consumed by the operations on order_products records.
 
 ## Note
 
